@@ -62,6 +62,14 @@ details[open].sec summary .chev{transform:rotate(90deg)}
 .input,select.input,textarea.input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;appearance:none;-webkit-appearance:none}
 select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2356636A' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 textarea.input{min-height:84px;resize:vertical}
+.combo{position:relative}
+.combo .input{padding-right:48px}
+.combo-btn{position:absolute;right:0;top:0;width:44px;height:44px;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.sugg{border:1px solid var(--line);border-radius:10px;background:#fff;max-height:264px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sugg-item{display:block;width:100%;min-height:44px;padding:0 12px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left;font-size:16px}
+.sugg-item:first-child{border-top:0}
+.sugg-item:active{background:var(--soft)}
+.sugg-none{padding:12px;font-size:14px;color:var(--muted)}
 .input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .trio{display:grid;grid-template-columns:1fr 1.4fr 1.2fr;gap:8px}
 .duo{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
@@ -228,7 +236,6 @@ function kitCompute(raw, todayISO) {
     u.daysToDue = gap;
     if (u.snooze && u.snooze > today) { snoozed.push(u); return; }
     if (gap < 0) overdue.push(u);
-    else if (gap <= (u.last ? 14 : 0)) dueSoon.push(u);
     else later.push(u);
   });
   overdue.sort(function (a, b) {
@@ -237,8 +244,13 @@ function kitCompute(raw, todayISO) {
     var rb = -b.daysToDue / ((b.months || defaultMonths) * 30.44);
     return rb - ra;
   });
-  dueSoon.sort(function (a, b) { return a.daysToDue - b.daysToDue || (a.months || defaultMonths) - (b.months || defaultMonths); });
-  later.sort(function (a, b) { return a.daysToDue - b.daysToDue || a.order - b.order; });
+  // "Due soon" is always the next few people coming up (six by default).
+  var soonCount = Math.max(1, Number(raw.settings && raw.settings.soonCount) || 6);
+  later.sort(function (a, b) {
+    return a.daysToDue - b.daysToDue || (a.months || defaultMonths) - (b.months || defaultMonths) || a.order - b.order;
+  });
+  dueSoon = later.slice(0, soonCount);
+  later = later.slice(soonCount);
 
   // Birthdays in the next fortnight.
   var birthdays = [];
@@ -312,6 +324,7 @@ var I = {
   back: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   sync: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.6M4 5v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.6M20 19v-4h-4"/></svg>',
   cog: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  down: '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>',
   chev: '<svg class="chev" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
 };
 
@@ -440,7 +453,8 @@ function dashView() {
 
   if (r.overdue.length) html += section('Overdue', r.overdue.length, r.overdue.map(function (u) { return unitRow(u, 'over', contactMeta(u)); }).join(''), 'over');
   if (r.dueSoon.length) html += section('Due soon', r.dueSoon.length, r.dueSoon.map(function (u) {
-    return unitRow(u, 'due', u.last ? contactMeta(u) : [u.tierCode, 'new'].join(' · '));
+    var when = u.daysToDue <= 0 ? '' : 'due ' + kitShort(u.due);
+    return unitRow(u, u.daysToDue <= 14 ? 'due' : 'calm', u.last ? [u.tierCode, u.since, when || u.lastMethod].filter(Boolean).join(' · ') : [u.tierCode, 'new', when].filter(Boolean).join(' · '));
   }).join(''));
   if (r.birthdays.length) html += section('Birthdays', r.birthdays.length, r.birthdays.map(function (b) {
     var when = b.days === 0 ? 'Today' : b.days === 1 ? 'Tomorrow' : kitWeekday(b.date);
@@ -519,33 +533,74 @@ function watchForm(form) {
 function logView(params) {
   var d = view(), r = kitCompute(d, todayISO());
   var who = params.get('who') || '';
-  var names = r.units.map(function (u) { return u.name; });
-  r.units.forEach(function (u) { if (u.members.length > 1) u.members.forEach(function (m) { names.push(m.name); }); });
-  names.sort(function (a, b) { return a.localeCompare(b); });
-  var opts = '<option value="">Choose…</option>' + names.map(function (n) {
-    return '<option' + (kitKey(n) === kitKey(who) ? ' selected' : '') + '>' + esc(n) + '</option>';
-  }).join('');
-  var methods = d.methods && d.methods.length ? d.methods : ['Phone', 'Text or WhatsApp', 'Email', 'Video', 'Visit', 'Letter or card'];
+  logNames = logNameList(r);
+  var known = logNames.filter(function (n) { return kitKey(n) === kitKey(who); })[0] || '';
+  var methods = d.methods && d.methods.length ? d.methods : DEFAULT_METHODS;
   return '<div class="top"><h1>Log contact</h1></div>' +
     '<form class="panel" id="logForm" novalidate>' +
-    '<div class="field"><label for="who">With</label><select class="input" id="who">' + opts + '</select></div>' +
+    '<div class="field"><label for="who">With</label><div class="combo">' +
+    '<input class="input" id="who" value="' + esc(known) + '" placeholder="Start typing a name" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sugg">' +
+    '<button type="button" class="combo-btn" id="whoAll" aria-label="Show everyone">' + I.down + '</button></div>' +
+    '<div class="sugg" id="sugg" role="listbox" hidden></div></div>' +
     '<div class="field"><span class="lbl">Date</span>' + dateSelects('ld', todayISO()) + '</div>' +
     '<div class="field"><span class="lbl">How</span><div class="chips" role="group" aria-label="Method">' +
     methods.map(function (m) { return '<button type="button" class="chip" aria-pressed="false">' + esc(m) + '</button>'; }).join('') + '</div></div>' +
-    '<div class="field"><label for="note">Note</label><textarea class="input" id="note" placeholder="Optional"></textarea></div>' +
+    '<div class="field"><label for="note">Note</label><textarea class="input" id="note" placeholder="Optional. Type, or tap the microphone on the keyboard to dictate."></textarea></div>' +
     '<div class="field"><label for="fu">Follow up</label><input class="input" id="fu" placeholder="Optional, e.g. ask how the interview went"></div>' +
     '<div class="field"><button class="btn" type="submit">Save</button></div></form>';
 }
+var DEFAULT_METHODS = ['Phone', 'Text or WhatsApp', 'Email', 'Letter or card', 'Coffee', 'Pub', 'Meal', 'Walk', 'Paddle', 'Meet-up', 'Went to see', 'Came to visit'];
+var logNames = [];
+function logNameList(r) {
+  var names = r.units.map(function (u) { return u.name; });
+  r.units.forEach(function (u) {
+    u.members.forEach(function (m) { if (kitKey(m.name) !== u.key) names.push(m.name); });
+  });
+  return names.sort(function (a, b) { return a.localeCompare(b); });
+}
+function matchNames(text) {
+  var t = kitKey(text);
+  if (!t) return logNames.slice();
+  var starts = [], inside = [];
+  logNames.forEach(function (n) {
+    var k = kitKey(n);
+    var wordStart = k.split(/[\s&,-]+/).some(function (w) { return w.indexOf(t) === 0; });
+    if (k.indexOf(t) === 0 || wordStart) starts.push(n);
+    else if (k.indexOf(t) >= 0) inside.push(n);
+  });
+  return starts.concat(inside);
+}
+function resolveName(text) {
+  var k = kitKey(text);
+  if (!k) return '';
+  var exact = logNames.filter(function (n) { return kitKey(n) === k; })[0];
+  if (exact) return exact;
+  var m = matchNames(text);
+  return m.length === 1 ? m[0] : '';
+}
 function bindLog() {
   var f = $('#logForm'); watchForm(f);
+  var input = $('#who'), box = $('#sugg');
+  function show(list) {
+    if (!list.length) { box.innerHTML = '<div class="sugg-none">No match. Add them on the Add person page first.</div>'; }
+    else box.innerHTML = list.map(function (n) { return '<button type="button" class="sugg-item" role="option">' + esc(n) + '</button>'; }).join('');
+    box.hidden = false; input.setAttribute('aria-expanded', 'true');
+    $$('.sugg-item', box).forEach(function (b) {
+      b.onclick = function () { input.value = b.textContent; hide(); keepForm = true; };
+    });
+  }
+  function hide() { box.hidden = true; input.setAttribute('aria-expanded', 'false'); }
+  input.addEventListener('input', function () { if (input.value.trim()) show(matchNames(input.value)); else hide(); });
+  input.addEventListener('focus', function () { if (input.value.trim() && !resolveName(input.value)) show(matchNames(input.value)); });
+  $('#whoAll').onclick = function () { if (box.hidden) show(matchNames('')); else hide(); };
   $$('.chip', f).forEach(function (c) {
-    c.onclick = function () { $$('.chip', f).forEach(function (o) { o.setAttribute('aria-pressed', 'false'); }); c.setAttribute('aria-pressed', 'true'); keepForm = true; };
+    c.onclick = function () { $$('.chip', f).forEach(function (o) { o.setAttribute('aria-pressed', 'false'); }); c.setAttribute('aria-pressed', 'true'); keepForm = true; hide(); };
   });
   f.onsubmit = function (e) {
     e.preventDefault();
-    var who = $('#who').value, date = readDate('ld');
+    var who = resolveName(input.value), date = readDate('ld');
     var m = $('.chip[aria-pressed="true"]', f);
-    if (!who) return toast('Choose who you were in touch with');
+    if (!who) { show(matchNames(input.value)); return toast('Choose a name from the list'); }
     if (!date) return toast('That date does not exist');
     if (!m) return toast('Choose how');
     enqueue({ type: 'log', who: who, date: date, method: m.textContent, note: $('#note').value.trim(), followup: $('#fu').value.trim() });
