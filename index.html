@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Keep in Touch">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ECEFEE">
+<title>Keep in Touch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEFEE; --card:#F8FAF9; --ink:#1E2528; --muted:#56636A; --accent:#46665B;
+  --line:#D5DCD9; --over:#A0502F; --due:#B07F2A; --soft:#E2E8E5;
+  --font:'Hanken Grotesk', -apple-system, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-text-size-adjust:100%}
+body{min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.wrap{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 14px 24px}
+.top{display:flex;align-items:center;gap:8px;padding:6px 6px 12px}
+.top h1{margin:0;font-size:24px;font-weight:300;letter-spacing:-.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .date{font-size:13px;color:var(--muted)}
+.icon-btn{width:44px;height:44px;border:0;background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;border-radius:22px;flex:none}
+.icon-btn:active{background:var(--soft)}
+.status{font-size:13px;color:var(--muted);padding:0 8px 10px}
+.status.warn{color:var(--over)}
+.sec{margin-bottom:14px}
+.sec-h{display:flex;justify-content:space-between;padding:0 8px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sec-h.over{color:var(--over)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;min-height:44px;padding-left:12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .main{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:44px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--accent)}
+.dot.over{background:var(--over)} .dot.due{background:var(--due)} .dot.calm{background:var(--line)}
+.name{flex:1;min-width:0;font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{flex:none;max-width:58%;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act{width:44px;height:44px;flex:none;border:0;background:transparent;color:var(--accent);display:flex;align-items:center;justify-content:center}
+.act:disabled{color:var(--line)}
+.empty{padding:14px 12px;color:var(--muted);font-size:14px}
+details.sec summary{list-style:none;cursor:pointer}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary .chev{transition:transform .15s}
+details[open].sec summary .chev{transform:rotate(90deg)}
+.foot{padding:4px 8px;font-size:13px;color:var(--muted)}
+
+/* Forms */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label,.lbl{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.input,select.input,textarea.input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;appearance:none;-webkit-appearance:none}
+select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2356636A' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+textarea.input{min-height:84px;resize:vertical}
+.input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.trio{display:grid;grid-template-columns:1fr 1.4fr 1.2fr;gap:8px}
+.duo{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:20px;background:#fff;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn{width:100%;min-height:48px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:16px;font-weight:600}
+.btn.ghost{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.btn:active{opacity:.85}
+.hint{font-size:13px;color:var(--muted);line-height:1.4}
+.summary{font-size:14px;color:var(--muted);padding:0 6px 14px;line-height:1.45}
+.sub{font-size:14px;font-weight:600;margin:0 0 12px}
+
+/* Records */
+.rec{padding:10px 12px;border-top:1px solid var(--line)}
+.rec:first-child{border-top:0}
+.rec-l1{display:flex;gap:8px;align-items:baseline;font-size:15px}
+.rec-l1 .d{color:var(--muted);font-size:13px;flex:none;width:56px}
+.rec-l1 .w{font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-l1 .m{color:var(--muted);font-size:13px;flex:none}
+.rec-n{font-size:14px;color:var(--ink);margin:4px 0 0 64px;line-height:1.4;white-space:pre-wrap}
+.rec-f{font-size:13px;color:var(--muted);margin:3px 0 0 64px}
+.rec-f.open{color:var(--due)}
+.month{padding:12px 8px 4px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* Nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);z-index:5}
+nav.tabs a{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:500}
+nav.tabs a[aria-current="page"]{color:var(--accent);font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app" aria-live="polite"></div>
+<nav class="tabs" id="tabs" aria-label="Main">
+  <a href="#/" data-tab="dash">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+    Dashboard</a>
+  <a href="#/records" data-tab="records">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+    Records</a>
+  <a href="#/log" data-tab="log">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h10a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4H10l-4 3v-3H5"/><path d="M10 11h5M12.5 8.5v5"/></svg>
+    Log contact</a>
+  <a href="#/add" data-tab="add">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 12-4.9"/><path d="M19 14v6M16 17h6"/></svg>
+    Add person</a>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ---- Shared dashboard logic (used by the app and by the weekly email) ----
+function kitParse(iso) {
+  if (!iso) return null;
+  var p = String(iso).split('-');
+  return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12);
+}
+function kitISO(d) {
+  var m = d.getMonth() + 1, day = d.getDate();
+  return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+}
+function kitAddMonths(d, n) {
+  var r = new Date(d.getTime());
+  var day = r.getDate();
+  r.setDate(1);
+  r.setMonth(r.getMonth() + n);
+  var last = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+  r.setDate(Math.min(day, last));
+  return r;
+}
+function kitDays(a, b) { return Math.round((b.getTime() - a.getTime()) / 86400000); }
+function kitKey(s) { return String(s || '').trim().toLowerCase(); }
+
+function kitSince(last, today) {
+  if (!last) return 'new';
+  var d = kitDays(last, today);
+  if (d <= 0) return 'today';
+  if (d < 14) return d + ' d';
+  if (d < 63) return Math.round(d / 7) + ' wk';
+  var m = Math.round(d / 30.44);
+  if (m < 24) return m + ' mo';
+  return Math.round(d / 365.25) + ' yr';
+}
+
+var KIT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var KIT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+function kitShort(d) { return d.getDate() + ' ' + KIT_MONTHS[d.getMonth()]; }
+function kitWeekday(d) { return KIT_DAYS[d.getDay()] + ' ' + kitShort(d); }
+
+function kitTierCode(name) {
+  var k = kitKey(name);
+  if (k === 'quarterly') return 'Q';
+  if (k === 'six-monthly') return '6M';
+  if (k === 'yearly') return 'Y';
+  return name ? name.charAt(0).toUpperCase() : '–';
+}
+
+/*
+ raw = { people:[{name, household, tier, birthday:'MM-DD', last:'YYYY-MM-DD', snooze}],
+         log:[{row, date, who, method, note, followup, done, pending}],
+         tiers:[{name, months}], settings:{start:'YYYY-MM-DD', perWeek:2} }
+*/
+function kitCompute(raw, todayISO) {
+  var today = kitParse(todayISO);
+  var tierMonths = {};
+  (raw.tiers || []).forEach(function (t) { tierMonths[kitKey(t.name)] = Number(t.months) || 12; });
+  var defaultMonths = 12;
+
+  // Build units: a household if one is given, otherwise the person.
+  var units = [], byKey = {}, memberToUnit = {};
+  (raw.people || []).forEach(function (p, i) {
+    if (!p.name) return;
+    var label = p.household ? p.household : p.name;
+    var k = kitKey(label);
+    var u = byKey[k];
+    if (!u) {
+      u = { key: k, name: label, members: [], months: null, tierName: '', last: null, lastMethod: '', snooze: null, order: i };
+      byKey[k] = u; units.push(u);
+    }
+    u.members.push(p);
+    memberToUnit[kitKey(p.name)] = u;
+    var m = p.tier ? tierMonths[kitKey(p.tier)] : null;
+    if (m && (u.months === null || m < u.months)) { u.months = m; u.tierName = p.tier; }
+    var approx = kitParse(p.last);
+    if (approx && (!u.last || approx > u.last)) { u.last = approx; u.lastMethod = ''; }
+    var sn = kitParse(p.snooze);
+    if (sn && (!u.snooze || sn > u.snooze)) u.snooze = sn;
+  });
+
+  // Fold in logged contacts.
+  var followups = [];
+  (raw.log || []).forEach(function (e) {
+    var u = byKey[kitKey(e.who)] || memberToUnit[kitKey(e.who)];
+    var d = kitParse(e.date);
+    if (u && d && (!u.last || d >= u.last)) { u.last = d; u.lastMethod = e.method || ''; }
+    if (e.followup && !e.done) followups.push({ row: e.row, who: e.who, text: e.followup, date: e.date, pending: !!e.pending, unitKey: u ? u.key : kitKey(e.who) });
+  });
+
+  // People never contacted are fed in a few a week from the start date.
+  var start = kitParse(raw.settings && raw.settings.start) || today;
+  var perWeek = Math.max(1, Number(raw.settings && raw.settings.perWeek) || 2);
+  var fresh = units.filter(function (u) { return !u.last && !(u.snooze && u.snooze > today); });
+  fresh.sort(function (a, b) {
+    var ma = a.months || defaultMonths, mb = b.months || defaultMonths;
+    return ma - mb || a.order - b.order;
+  });
+  fresh.forEach(function (u, k) {
+    var due = new Date(start.getTime());
+    due.setDate(due.getDate() + Math.floor(k / perWeek) * 7);
+    u.due = due;
+  });
+
+  var overdue = [], dueSoon = [], later = [], snoozed = [];
+  units.forEach(function (u) {
+    if (u.last) u.due = kitAddMonths(u.last, u.months || defaultMonths);
+    else if (!u.due) u.due = u.snooze || today;
+    u.dueISO = kitISO(u.due);
+    u.lastISO = u.last ? kitISO(u.last) : '';
+    u.tierCode = kitTierCode(u.tierName);
+    u.since = kitSince(u.last, today);
+    var gap = kitDays(today, u.due);
+    u.daysToDue = gap;
+    if (u.snooze && u.snooze > today) { snoozed.push(u); return; }
+    if (gap < 0) overdue.push(u);
+    else if (gap <= (u.last ? 14 : 0)) dueSoon.push(u);
+    else later.push(u);
+  });
+  overdue.sort(function (a, b) {
+    // Most overdue relative to their interval first.
+    var ra = -a.daysToDue / ((a.months || defaultMonths) * 30.44);
+    var rb = -b.daysToDue / ((b.months || defaultMonths) * 30.44);
+    return rb - ra;
+  });
+  dueSoon.sort(function (a, b) { return a.daysToDue - b.daysToDue || (a.months || defaultMonths) - (b.months || defaultMonths); });
+  later.sort(function (a, b) { return a.daysToDue - b.daysToDue || a.order - b.order; });
+
+  // Birthdays in the next fortnight.
+  var birthdays = [];
+  (raw.people || []).forEach(function (p) {
+    if (!p.name || !p.birthday) return;
+    var bits = String(p.birthday).split('-');
+    var mo = Number(bits[0]), dy = Number(bits[1]);
+    if (!mo || !dy) return;
+    var next = new Date(today.getFullYear(), mo - 1, dy, 12);
+    if (kitDays(today, next) < 0) next = new Date(today.getFullYear() + 1, mo - 1, dy, 12);
+    var gap = kitDays(today, next);
+    if (gap <= 14) birthdays.push({ name: p.name, date: next, days: gap, unitKey: (memberToUnit[kitKey(p.name)] || {}).key });
+  });
+  birthdays.sort(function (a, b) { return a.days - b.days; });
+
+  return { units: units, byKey: byKey, overdue: overdue, dueSoon: dueSoon, later: later, snoozed: snoozed, birthdays: birthdays, followups: followups, today: today };
+}
+// ---- end shared logic ----
+
+
+// ---------- Storage ----------
+var LS = {
+  get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+var cfg = LS.get('kit_cfg', null);
+var data = LS.get('kit_data', null);       // last data from the sheet
+var queue = LS.get('kit_queue', []);       // changes waiting to send
+var lastSync = LS.get('kit_synced', 0);
+var syncing = false, lastError = '';
+
+// Connection details can arrive by the emailed setup link (#setup=...&key=...)
+// or in the home-screen address (?c=...).
+(function readConfig() {
+  var h = location.hash;
+  if (h.indexOf('#setup=') === 0) {
+    var p = new URLSearchParams(h.slice(1));
+    if (p.get('setup') && p.get('key')) {
+      cfg = { url: p.get('setup'), key: p.get('key') };
+      LS.set('kit_cfg', cfg);
+      sessionStorage.setItem('kit_welcome', '1');
+    }
+  }
+  var q = new URLSearchParams(location.search).get('c');
+  if (!cfg && q) {
+    try { cfg = JSON.parse(atob(q)); LS.set('kit_cfg', cfg); } catch (e) {}
+  }
+  if (cfg) {
+    // Keep the details in the address so Add to Home Screen carries them.
+    var c = btoa(JSON.stringify(cfg));
+    var want = location.pathname + '?c=' + encodeURIComponent(c);
+    var hash = (location.hash.indexOf('#setup=') === 0) ? '#/' : (location.hash || '#/');
+    if (location.pathname + location.search !== want || location.hash !== hash) history.replaceState(null, '', want + hash);
+  }
+})();
+
+// ---------- Helpers ----------
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function todayISO() { return kitISO(new Date()); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function $(sel, root) { return (root || document).querySelector(sel); }
+function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+var toastTimer;
+function toast(msg) {
+  var t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+var I = {
+  plus: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  tick: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  back: '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  sync: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.6M4 5v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.6M20 19v-4h-4"/></svg>',
+  cog: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  chev: '<svg class="chev" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
+};
+
+// ---------- Data with pending changes applied ----------
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function view() {
+  var d = clone(data || { people: [], log: [], tiers: [], methods: [], settings: {} });
+  queue.forEach(function (op) { applyLocal(d, op); });
+  return d;
+}
+function applyLocal(d, op) {
+  if (op.type === 'log') d.log.push({ row: null, date: op.date, who: op.who, method: op.method, note: op.note, followup: op.followup, done: false, pending: true });
+  if (op.type === 'add') d.people.push({ name: op.name, household: op.household, tier: op.tier, birthday: op.birthday, last: op.last, snooze: '' });
+  if (op.type === 'edit') d.people.forEach(function (p) {
+    if (kitKey(p.name) === kitKey(op.name)) { p.household = op.household; p.tier = op.tier; p.birthday = op.birthday; p.snooze = op.snooze; }
+  });
+  if (op.type === 'done') d.log.forEach(function (e) { if (e.row === op.row) e.done = true; });
+}
+function enqueue(op) { op.id = uid(); queue.push(op); LS.set('kit_queue', queue); sync(); }
+
+// ---------- Talking to the sheet ----------
+function fetchData() {
+  if (!cfg) return Promise.resolve();
+  return fetch(cfg.url + '?key=' + encodeURIComponent(cfg.key), { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (!res.ok) throw new Error(res.error || 'Could not read the sheet');
+      gotData(res.data);
+    });
+}
+function gotData(d) {
+  data = d; LS.set('kit_data', data);
+  lastSync = Date.now(); LS.set('kit_synced', lastSync);
+  lastError = '';
+}
+function sync() {
+  if (!cfg || syncing) return Promise.resolve();
+  if (!navigator.onLine) { render(); return Promise.resolve(); }
+  syncing = true; render();
+  var p;
+  if (queue.length) {
+    var sending = queue.slice();
+    p = fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: cfg.key, ops: sending }) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.error || 'Could not save');
+        var done = {};
+        (res.applied || []).forEach(function (id) { done[id] = 1; });
+        (res.errors || []).forEach(function (e) { done[e.id] = 1; toast(e.error); });
+        queue = queue.filter(function (op) { return !done[op.id]; });
+        LS.set('kit_queue', queue);
+        gotData(res.data);
+      });
+  } else {
+    p = fetchData();
+  }
+  return p.catch(function (err) { lastError = navigator.onLine ? (err.message || 'Could not reach the sheet') : ''; })
+    .then(function () { syncing = false; render(); });
+}
+window.addEventListener('online', sync);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) sync(); });
+
+// ---------- Rendering ----------
+function route() {
+  var h = location.hash.replace(/^#/, '') || '/';
+  var qi = h.indexOf('?');
+  var path = qi >= 0 ? h.slice(0, qi) : h;
+  var params = new URLSearchParams(qi >= 0 ? h.slice(qi + 1) : '');
+  return { path: path, params: params };
+}
+var keepForm = false;
+function render() {
+  if (keepForm) return; // do not wipe a form the user is filling in
+  var r = route(), app = $('#app');
+  var tab = r.path === '/' ? 'dash' : r.path.split('/')[1];
+  $$('#tabs a').forEach(function (a) { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  if (!cfg) { app.innerHTML = setupView(); bindSetup(); return; }
+  if (r.path === '/' || r.path === '') { app.innerHTML = dashView(); bindDash(); }
+  else if (r.path === '/records') { app.innerHTML = recordsView(r.params); bindRecords(); }
+  else if (r.path === '/log') { app.innerHTML = logView(r.params); bindLog(); }
+  else if (r.path === '/add') { app.innerHTML = addView(); bindAdd(); }
+  else if (r.path.indexOf('/u/') === 0) { app.innerHTML = unitView(decodeURIComponent(r.path.slice(3))); bindUnit(); }
+  else if (r.path === '/settings') { app.innerHTML = settingsView(); bindSettings(); }
+  else { location.hash = '#/'; }
+}
+window.addEventListener('hashchange', function () { keepForm = false; render(); window.scrollTo(0, 0); });
+
+function statusLine() {
+  var bits = [];
+  if (!navigator.onLine) bits.push('Offline');
+  if (queue.length) bits.push(queue.length + (queue.length === 1 ? ' change' : ' changes') + ' waiting to send');
+  if (syncing) bits.push('Syncing…');
+  if (lastError) return '<div class="status warn">' + esc(lastError) + '</div>';
+  if (!data && !syncing) bits.push('Not yet loaded');
+  return bits.length ? '<div class="status">' + esc(bits.join(' · ')) + '</div>' : '';
+}
+
+function unitHref(key) { return '#/u/' + encodeURIComponent(key); }
+function logHref(name) { return '#/log?who=' + encodeURIComponent(name); }
+
+function unitRow(u, dotClass, meta) {
+  return '<div class="row"><a class="main" href="' + unitHref(u.key) + '"><span class="dot ' + dotClass + '" aria-hidden="true"></span>' +
+    '<span class="name">' + esc(u.name) + '</span><span class="meta">' + esc(meta) + '</span></a>' +
+    '<a class="act" href="' + logHref(u.name) + '" aria-label="Log contact with ' + esc(u.name) + '">' + I.plus + '</a></div>';
+}
+function contactMeta(u) {
+  return [u.tierCode, u.since, u.lastMethod].filter(Boolean).join(' · ');
+}
+function section(title, count, rows, cls) {
+  return '<div class="sec"><div class="sec-h ' + (cls || '') + '"><span>' + title + '</span><span>' + count + '</span></div><div class="card">' + rows + '</div></div>';
+}
+
+function dashView() {
+  var d = view(), r = kitCompute(d, todayISO()), t = r.today;
+  var html = '<div class="top"><h1>Keep in Touch</h1><span class="date">' + kitWeekday(t) + '</span>' +
+    '<button class="icon-btn" id="refresh" aria-label="Refresh">' + I.sync + '</button>' +
+    '<a class="icon-btn" href="#/settings" aria-label="Settings">' + I.cog + '</a></div>' + statusLine();
+
+  if (sessionStorage.getItem('kit_welcome')) {
+    html += '<div class="panel"><p class="sub">Connected</p><p class="hint">Now tap Share, then Add to Home Screen, and open Keep in Touch from its icon.</p></div>';
+  }
+  if (!d.people.length) {
+    html += '<div class="panel hint">' + (data ? 'No one on the list yet. Add people here or in the People tab of the sheet.' : 'Loading…') + '</div>';
+    return html;
+  }
+
+  if (r.overdue.length) html += section('Overdue', r.overdue.length, r.overdue.map(function (u) { return unitRow(u, 'over', contactMeta(u)); }).join(''), 'over');
+  if (r.dueSoon.length) html += section('Due soon', r.dueSoon.length, r.dueSoon.map(function (u) {
+    return unitRow(u, 'due', u.last ? contactMeta(u) : [u.tierCode, 'new'].join(' · '));
+  }).join(''));
+  if (r.birthdays.length) html += section('Birthdays', r.birthdays.length, r.birthdays.map(function (b) {
+    var when = b.days === 0 ? 'Today' : b.days === 1 ? 'Tomorrow' : kitWeekday(b.date);
+    var u = r.byKey[b.unitKey];
+    return '<div class="row"><a class="main" href="' + unitHref(b.unitKey) + '"><span class="dot" aria-hidden="true"></span><span class="name">' + esc(b.name) +
+      '</span><span class="meta">' + esc(when) + '</span></a><a class="act" href="' + logHref(u ? u.name : b.name) + '" aria-label="Log contact with ' + esc(b.name) + '">' + I.plus + '</a></div>';
+  }).join(''));
+  if (r.followups.length) html += section('Follow up', r.followups.length, r.followups.map(function (f) {
+    return '<div class="row"><a class="main" href="' + unitHref(f.unitKey) + '"><span class="dot" aria-hidden="true"></span><span class="name">' + esc(f.who) +
+      '</span><span class="meta">' + esc(f.text) + '</span></a><button class="act done" data-row="' + (f.row || '') + '" data-who="' + esc(f.who) + '"' +
+      (f.pending ? ' disabled aria-label="Waiting to send"' : ' aria-label="Mark done: ' + esc(f.who) + '"') + '>' + I.tick + '</button></div>';
+  }).join(''));
+  if (!r.overdue.length && !r.dueSoon.length && !r.birthdays.length && !r.followups.length) {
+    html += '<div class="panel hint">No one is due. The next is ' + (r.later[0] ? esc(r.later[0].name) + ', due ' + kitShort(r.later[0].due) : 'not set') + '.</div>';
+  }
+  if (r.later.length) html += '<details class="sec"><summary class="sec-h"><span>Later</span><span>' + r.later.length + ' ' + I.chev + '</span></summary><div class="card">' +
+    r.later.map(function (u) { return unitRow(u, 'calm', [u.tierCode, 'due ' + kitShort(u.due)].join(' · ')); }).join('') + '</div></details>';
+  if (r.snoozed.length) html += '<details class="sec"><summary class="sec-h"><span>Snoozed</span><span>' + r.snoozed.length + ' ' + I.chev + '</span></summary><div class="card">' +
+    r.snoozed.map(function (u) { return unitRow(u, 'calm', 'until ' + kitShort(u.snooze)); }).join('') + '</div></details>';
+  return html;
+}
+function bindDash() {
+  var b = $('#refresh'); if (b) b.onclick = function () { sessionStorage.removeItem('kit_welcome'); sync(); };
+  $$('.act.done').forEach(function (btn) {
+    btn.onclick = function () {
+      if (!btn.dataset.row) return;
+      enqueue({ type: 'done', row: Number(btn.dataset.row), who: btn.dataset.who });
+      toast('Follow-up done'); render();
+    };
+  });
+}
+
+// Day / month / year pickers (iOS's own date wheel is awkward for this).
+function dateSelects(prefix, iso, opts) {
+  opts = opts || {};
+  var d = iso ? kitParse(iso) : null;
+  var day = '<select class="input" id="' + prefix + 'd" aria-label="Day">' + (opts.blank ? '<option value="">Day</option>' : '');
+  for (var i = 1; i <= 31; i++) day += '<option' + (d && d.getDate() === i ? ' selected' : '') + '>' + i + '</option>';
+  day += '</select>';
+  var mon = '<select class="input" id="' + prefix + 'm" aria-label="Month">' + (opts.blank ? '<option value="">Month</option>' : '');
+  KIT_MONTHS.forEach(function (m, i) { mon += '<option value="' + (i + 1) + '"' + (d && d.getMonth() === i ? ' selected' : '') + '>' + m + '</option>'; });
+  mon += '</select>';
+  if (opts.noYear) return '<div class="duo">' + day + mon + '</div>';
+  var y0 = new Date().getFullYear();
+  var yr = '<select class="input" id="' + prefix + 'y" aria-label="Year">' + (opts.blank ? '<option value="">Year</option>' : '');
+  for (var y = y0 + (opts.future ? 2 : 0); y >= y0 - 2; y--) yr += '<option' + (d && d.getFullYear() === y ? ' selected' : '') + '>' + y + '</option>';
+  yr += '</select>';
+  return '<div class="trio">' + day + mon + yr + '</div>';
+}
+function readDate(prefix) {
+  var d = $('#' + prefix + 'd').value, m = $('#' + prefix + 'm').value, yEl = $('#' + prefix + 'y');
+  var y = yEl ? yEl.value : '2000';
+  if (!d || !m || !y) return '';
+  var dt = new Date(Number(y), Number(m) - 1, Number(d), 12);
+  if (dt.getMonth() !== Number(m) - 1) return null; // e.g. 31 June
+  return kitISO(dt);
+}
+function readBirthday(prefix) {
+  var d = $('#' + prefix + 'd').value, m = $('#' + prefix + 'm').value;
+  if (!d || !m) return '';
+  return (m.length < 2 ? '0' : '') + m + '-' + (d.length < 2 ? '0' : '') + d;
+}
+function bdayISO(mmdd) { return mmdd ? '2000-' + mmdd : ''; }
+
+function tierOptions(current, tiers) {
+  var h = '<option value="">No tier yet</option>';
+  tiers.forEach(function (t) { h += '<option' + (kitKey(t.name) === kitKey(current) ? ' selected' : '') + '>' + esc(t.name) + '</option>'; });
+  return h;
+}
+function watchForm(form) {
+  form.addEventListener('input', function () { keepForm = true; });
+  form.addEventListener('change', function () { keepForm = true; });
+}
+
+// ---- Log contact ----
+function logView(params) {
+  var d = view(), r = kitCompute(d, todayISO());
+  var who = params.get('who') || '';
+  var names = r.units.map(function (u) { return u.name; });
+  r.units.forEach(function (u) { if (u.members.length > 1) u.members.forEach(function (m) { names.push(m.name); }); });
+  names.sort(function (a, b) { return a.localeCompare(b); });
+  var opts = '<option value="">Choose…</option>' + names.map(function (n) {
+    return '<option' + (kitKey(n) === kitKey(who) ? ' selected' : '') + '>' + esc(n) + '</option>';
+  }).join('');
+  var methods = d.methods && d.methods.length ? d.methods : ['Phone', 'Text or WhatsApp', 'Email', 'Video', 'Visit', 'Letter or card'];
+  return '<div class="top"><h1>Log contact</h1></div>' +
+    '<form class="panel" id="logForm" novalidate>' +
+    '<div class="field"><label for="who">With</label><select class="input" id="who">' + opts + '</select></div>' +
+    '<div class="field"><span class="lbl">Date</span>' + dateSelects('ld', todayISO()) + '</div>' +
+    '<div class="field"><span class="lbl">How</span><div class="chips" role="group" aria-label="Method">' +
+    methods.map(function (m) { return '<button type="button" class="chip" aria-pressed="false">' + esc(m) + '</button>'; }).join('') + '</div></div>' +
+    '<div class="field"><label for="note">Note</label><textarea class="input" id="note" placeholder="Optional"></textarea></div>' +
+    '<div class="field"><label for="fu">Follow up</label><input class="input" id="fu" placeholder="Optional, e.g. ask how the interview went"></div>' +
+    '<div class="field"><button class="btn" type="submit">Save</button></div></form>';
+}
+function bindLog() {
+  var f = $('#logForm'); watchForm(f);
+  $$('.chip', f).forEach(function (c) {
+    c.onclick = function () { $$('.chip', f).forEach(function (o) { o.setAttribute('aria-pressed', 'false'); }); c.setAttribute('aria-pressed', 'true'); keepForm = true; };
+  });
+  f.onsubmit = function (e) {
+    e.preventDefault();
+    var who = $('#who').value, date = readDate('ld');
+    var m = $('.chip[aria-pressed="true"]', f);
+    if (!who) return toast('Choose who you were in touch with');
+    if (!date) return toast('That date does not exist');
+    if (!m) return toast('Choose how');
+    enqueue({ type: 'log', who: who, date: date, method: m.textContent, note: $('#note').value.trim(), followup: $('#fu').value.trim() });
+    keepForm = false; toast('Logged'); location.hash = '#/';
+  };
+}
+
+// ---- Add person ----
+var APPROX = [
+  ['', "Don't know"], ['0.5', 'Within the last month'], ['2', '1 to 3 months ago'],
+  ['4.5', '3 to 6 months ago'], ['9', '6 to 12 months ago'], ['18', 'Over a year ago']
+];
+function addView() {
+  var d = view();
+  var households = {};
+  d.people.forEach(function (p) { if (p.household) households[p.household] = 1; });
+  return '<div class="top"><h1>Add person</h1></div>' +
+    '<form class="panel" id="addForm" novalidate>' +
+    '<div class="field"><label for="nm">Name</label><input class="input" id="nm" autocomplete="off" autocapitalize="words"></div>' +
+    '<div class="field"><label for="hh">Household</label><input class="input" id="hh" list="hhList" autocomplete="off" placeholder="Optional">' +
+    '<datalist id="hhList">' + Object.keys(households).map(function (h) { return '<option value="' + esc(h) + '">'; }).join('') + '</datalist>' +
+    '<span class="hint">People with the same household name show as one line.</span></div>' +
+    '<div class="field"><label for="tr">Tier</label><select class="input" id="tr">' + tierOptions('', d.tiers || []) + '</select></div>' +
+    '<div class="field"><span class="lbl">Birthday</span>' + dateSelects('bd', '', { blank: true, noYear: true }) + '</div>' +
+    '<div class="field"><label for="lc">Last in touch</label><select class="input" id="lc">' +
+    APPROX.map(function (a) { return '<option value="' + a[0] + '">' + a[1] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="field"><button class="btn" type="submit">Add</button></div></form>';
+}
+function bindAdd() {
+  var f = $('#addForm'); watchForm(f);
+  f.onsubmit = function (e) {
+    e.preventDefault();
+    var name = $('#nm').value.trim();
+    if (!name) return toast('Enter a name');
+    var exists = view().people.some(function (p) { return kitKey(p.name) === kitKey(name); });
+    if (exists) return toast(name + ' is already on the list');
+    var months = $('#lc').value, last = '';
+    if (months) {
+      var dt = new Date(); dt.setDate(dt.getDate() - Math.round(Number(months) * 30.44));
+      last = kitISO(dt);
+    }
+    enqueue({ type: 'add', name: name, household: $('#hh').value.trim(), tier: $('#tr').value, birthday: readBirthday('bd'), last: last });
+    keepForm = false; toast(name + ' added'); location.hash = '#/';
+  };
+}
+
+// ---- One person or household ----
+function historyFor(d, u) {
+  var keys = {}; keys[u.key] = 1;
+  u.members.forEach(function (m) { keys[kitKey(m.name)] = 1; });
+  return d.log.filter(function (e) { return keys[kitKey(e.who)]; })
+    .sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+}
+function recRow(e) {
+  var dt = kitParse(e.date);
+  return '<div class="rec"><div class="rec-l1"><span class="d">' + kitShort(dt) + '</span><span class="w">' + esc(e.who) +
+    '</span><span class="m">' + esc(e.method) + '</span></div>' +
+    (e.note ? '<div class="rec-n">' + esc(e.note) + '</div>' : '') +
+    (e.followup ? '<div class="rec-f' + (e.done ? '' : ' open') + '">' + (e.done ? 'Followed up: ' : 'To follow up: ') + esc(e.followup) + '</div>' : '') + '</div>';
+}
+function unitView(key) {
+  var d = view(), r = kitCompute(d, todayISO()), u = r.byKey[key];
+  if (!u) return '<div class="top"><a class="icon-btn" href="#/" aria-label="Back">' + I.back + '</a><h1>Not found</h1></div>';
+  var lastTxt = u.last ? 'last in touch ' + kitShort(u.last) + ' ' + u.last.getFullYear() + (u.lastMethod ? ' by ' + u.lastMethod.toLowerCase() : '') : 'no contact logged yet';
+  var parts = [u.tierName || 'No tier yet', lastTxt, (u.daysToDue < 0 ? 'was due ' : 'due ') + kitShort(u.due)];
+  if (u.snooze && u.snooze > r.today) parts.push('snoozed until ' + kitShort(u.snooze));
+  var hist = historyFor(d, u);
+  var html = '<div class="top"><a class="icon-btn" href="#/" aria-label="Back">' + I.back + '</a><h1>' + esc(u.name) + '</h1></div>' +
+    '<div class="summary">' + esc(parts.join(' · ')) + '</div>' +
+    '<div class="panel" style="padding:12px"><a class="btn" style="display:flex;align-items:center;justify-content:center" href="' + logHref(u.name) + '">Log contact</a></div>';
+  u.members.forEach(function (p, i) {
+    var sn = p.snooze && kitParse(p.snooze) > r.today ? p.snooze : '';
+    html += '<form class="panel member" data-name="' + esc(p.name) + '" data-i="' + i + '" data-snooze="' + esc(sn) + '" novalidate>' +
+      (u.members.length > 1 || kitKey(p.name) !== u.key ? '<p class="sub">' + esc(p.name) + '</p>' : '') +
+      '<div class="field"><label for="tr' + i + '">Tier</label><select class="input" id="tr' + i + '">' + tierOptions(p.tier, d.tiers || []) + '</select></div>' +
+      '<div class="field"><label for="hh' + i + '">Household</label><input class="input" id="hh' + i + '" value="' + esc(p.household) + '" placeholder="Optional" autocomplete="off"></div>' +
+      '<div class="field"><span class="lbl">Birthday</span>' + dateSelects('bd' + i, bdayISO(p.birthday), { blank: true, noYear: true }) + '</div>' +
+      '<div class="field"><label for="sn' + i + '">Snooze</label><select class="input" id="sn' + i + '">' +
+      '<option value="">Not snoozed</option>' + (sn ? '<option value="keep" selected>Until ' + kitShort(kitParse(sn)) + ' ' + kitParse(sn).getFullYear() + '</option>' : '') +
+      '<option value="1">For a month</option><option value="3">For 3 months</option><option value="6">For 6 months</option></select></div>' +
+      '<div class="field"><button class="btn ghost" type="submit">Save changes</button></div></form>';
+  });
+  html += '<div class="sec"><div class="sec-h"><span>History</span><span>' + hist.length + '</span></div><div class="card">' +
+    (hist.length ? hist.map(recRow).join('') : '<div class="empty">Nothing logged yet.</div>') + '</div></div>' +
+    '<p class="hint" style="padding:0 6px">To rename or remove someone, edit the People tab of the sheet.</p>';
+  return html;
+}
+function bindUnit() {
+  $$('form.member').forEach(function (f) {
+    watchForm(f);
+    var i = f.dataset.i;
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var s = $('#sn' + i).value, snooze = '';
+      if (s === 'keep') snooze = f.dataset.snooze;
+      else if (s) snooze = kitISO(kitAddMonths(new Date(), Number(s)));
+      enqueue({ type: 'edit', name: f.dataset.name, tier: $('#tr' + i).value, household: $('#hh' + i).value.trim(), birthday: readBirthday('bd' + i), snooze: snooze });
+      keepForm = false; toast('Saved'); render();
+    };
+  });
+}
+
+// ---- Records ----
+function recordsView(params) {
+  var d = view(), r = kitCompute(d, todayISO());
+  var filter = params.get('who') || '';
+  var list = d.log.slice();
+  if (filter) {
+    var u = r.byKey[filter];
+    list = u ? historyFor(d, u) : [];
+  } else {
+    list.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+  }
+  var opts = '<option value="">Everyone</option>' + r.units.slice().sort(function (a, b) { return a.name.localeCompare(b.name); })
+    .map(function (u) { return '<option value="' + esc(u.key) + '"' + (u.key === filter ? ' selected' : '') + '>' + esc(u.name) + '</option>'; }).join('');
+  var html = '<div class="top"><h1>Records</h1></div>' + statusLine() +
+    '<div class="field" style="padding:0 2px 6px"><label class="sr" for="rf">Show</label><select class="input" id="rf">' + opts + '</select></div>';
+  if (!list.length) return html + '<div class="card"><div class="empty">Nothing logged yet.</div></div>';
+  var month = '', open = false;
+  list.forEach(function (e) {
+    var dt = kitParse(e.date), m = KIT_MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
+    if (m !== month) { if (open) html += '</div>'; html += '<div class="month">' + m + '</div><div class="card">'; month = m; open = true; }
+    html += recRow(e);
+  });
+  if (open) html += '</div>';
+  return html;
+}
+function bindRecords() {
+  var s = $('#rf'); if (s) s.onchange = function () { location.hash = '#/records' + (s.value ? '?who=' + encodeURIComponent(s.value) : ''); };
+}
+
+// ---- Settings and setup ----
+function settingsView() {
+  var when = lastSync ? new Date(lastSync) : null;
+  return '<div class="top"><a class="icon-btn" href="#/" aria-label="Back">' + I.back + '</a><h1>Settings</h1></div>' + statusLine() +
+    '<div class="panel"><p class="sub">Sheet</p><p class="hint">' + (when ? 'Last updated ' + kitWeekday(when) + ' at ' + when.toTimeString().slice(0, 5) + '.' : 'Not yet updated.') +
+    (queue.length ? ' ' + queue.length + ' change' + (queue.length === 1 ? '' : 's') + ' waiting to send.' : '') + '</p>' +
+    '<div class="field" style="margin-top:12px"><button class="btn" id="syncNow" type="button">Update now</button></div></div>' +
+    '<div class="panel"><p class="sub">Weekly email</p><p class="hint">To get a Monday-morning email listing who is due, open the sheet, choose Extensions › Apps Script and run <b>setupWeeklyEmail</b> once.</p></div>' +
+    '<div class="panel"><p class="sub">Disconnect</p><p class="hint">Removes the connection from this phone. The sheet is not affected.</p>' +
+    '<div class="field" style="margin-top:12px"><button class="btn ghost" id="unlink" type="button">Disconnect this phone</button></div></div>';
+}
+function bindSettings() {
+  $('#syncNow').onclick = function () { sync().then(function () { if (!lastError) toast('Up to date'); }); };
+  $('#unlink').onclick = function () {
+    if (queue.length && !confirm(queue.length + ' changes have not been sent and will be lost. Disconnect anyway?')) return;
+    localStorage.clear(); cfg = null; data = null; queue = [];
+    history.replaceState(null, '', location.pathname + '#/'); render();
+  };
+}
+function setupView() {
+  return '<div class="top"><h1>Keep in Touch</h1></div>' +
+    '<div class="panel"><p class="sub">Connect to your sheet</p><p class="hint">Open the setup email on this phone and tap its link. ' +
+    'Or paste the web app address and key below.</p>' +
+    '<form id="setupForm" novalidate style="margin-top:14px"><div class="field"><label for="su">Web app address</label><input class="input" id="su" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec"></div>' +
+    '<div class="field"><label for="sk">Key</label><input class="input" id="sk" autocomplete="off"></div>' +
+    '<div class="field"><button class="btn" type="submit">Connect</button></div></form></div>';
+}
+function bindSetup() {
+  $('#setupForm').onsubmit = function (e) {
+    e.preventDefault();
+    var u = $('#su').value.trim(), k = $('#sk').value.trim();
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u) || !k) return toast('Check the address and key');
+    location.href = location.pathname + '#setup=' + encodeURIComponent(u) + '&key=' + encodeURIComponent(k);
+    location.reload();
+  };
+}
+
+// ---------- Start ----------
+render();
+sync();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+</script>
+</body>
+</html>
